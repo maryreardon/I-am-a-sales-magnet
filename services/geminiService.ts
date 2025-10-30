@@ -2,7 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Quote } from '../types';
 
 export async function generateSalesQuote(): Promise<Quote> {
-  if (!process.env.API_KEY) {
+  if (typeof process === 'undefined' || !process.env.API_KEY) {
     throw new Error("Gemini API key not found. Please set the API_KEY as an environment variable in your deployment configuration.");
   }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Quote } from '../types';
 
 interface QuoteCardProps {
@@ -18,9 +18,24 @@ const CheckIcon = () => (
     </svg>
 );
 
+const ShareIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+    <polyline points="16 6 12 2 8 6" />
+    <line x1="12" x2="12" y1="2" y2="15" />
+  </svg>
+);
+
 
 const QuoteCard: React.FC<QuoteCardProps> = ({ quoteData }) => {
   const [isCopied, setIsCopied] = useState(false);
+  const [isShareSupported, setIsShareSupported] = useState(false);
+
+  useEffect(() => {
+    if (navigator.share) {
+      setIsShareSupported(true);
+    }
+  }, []);
 
   const handleCopy = async () => {
     if (!quoteData) return;
@@ -33,10 +48,33 @@ const QuoteCard: React.FC<QuoteCardProps> = ({ quoteData }) => {
       console.error('Failed to copy text: ', err);
     }
   };
+  
+  const handleShare = async () => {
+    if (!quoteData) return;
+    const shareData = {
+      title: 'Sales Quote',
+      text: `"${quoteData.quote}" — ${quoteData.author}`,
+    };
+    try {
+      await navigator.share(shareData);
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
 
   return (
     <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl shadow-lg p-6 sm:p-8 w-full max-w-2xl mx-auto transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-blue-500/20">
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        {isShareSupported && (
+           <button
+            onClick={handleShare}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-full bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            aria-label="Share quote"
+           >
+             <ShareIcon />
+             <span>Share</span>
+           </button>
+        )}
         <button
           onClick={handleCopy}
           className="flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-full bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
